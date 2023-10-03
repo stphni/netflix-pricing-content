@@ -1,0 +1,344 @@
+---
+title: "Netflix Subscription Analysis (Data from Dec. 2021)"
+author: "stphni"
+date: "March 2022"
+output: github_document
+---
+<style type="text/css">
+body p, div, h1, h2, h3, h4, h5 {
+color: black;
+font-family: Modern Computer Roman;
+}
+slides > slide.title-slide hgroup h1 {
+color: #E50914; <!--the maroon color-->
+}
+h2 {
+color: #E50914; <!-- the maroon color-->
+}
+</style> <!-- end of defining font in various parts of slides -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include = FALSE}
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(ggplot2)
+library(countrycode)
+#library("ggpubr")
+```
+
+
+## Data Selection and Purpose
+* Data set from Kaggle: Netflix Subscription Fee In Different Countries (Dec. 2021)
+* CSV file based on the data collected from https://www.comparitech.com/blog/vpn-privacy/countries-netflix-cost/
+* **Purpose**: Is there a correlation between Netflix's basic, standard and premium monthly cost vs the total library content (movies + TV shows) per region? 
+
+## Sorting Countries by Region and Filtering
+For the purpose of this data analysis, a column was added to the data set called *Continent*, in order to categorize countries by their region. 
+```
+netflix_df$Continent = countrycode(sourcevar = netflix_df[, "Country"],
+                          origin = "country.name",
+                          destination = "region23")
+```
+Code used to filter and summarize by region (ex. below is Australia & New Zealand): 
+```
+netflix_AUS = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Australia and New Zealand") %>%
+                summarise(avg_shows = round(sum(No._of_TV_Shows) / 2),
+                avg_movies = round(sum(No._of_Movies) / 2)) %>% 
+                dplyr::select(Continent, avg_shows, avg_movies)
+```
+```{r, include = FALSE} 
+netflix_df = read.csv("Netflix subscription fee Dec-2021.csv", sep = ",", header = TRUE)
+netflix_df = netflix_df %>% 
+   rename(Total_Library_Size = Total.Library.Size) %>%
+   rename(No._of_TV_Shows = No..of.TV.Shows) %>%
+   rename(No._of_Movies = No..of.Movies) %>%
+   rename(Cost_Per_Month_Basic = Cost.Per.Month...Basic....) %>%
+   rename(Cost_Per_Month_Standard = Cost.Per.Month...Standard....) %>%
+   rename(Cost_Per_Month_Premium = Cost.Per.Month...Premium....)
+
+netflix_df$Continent = countrycode(sourcevar = netflix_df[, "Country"],
+                          origin = "country.name",
+                          destination = "region23")
+```
+
+## Bar Plot
+```{r, warning = FALSE, error = FALSE, tidy = TRUE}
+netflix_AUS = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Australia and New Zealand") %>%
+                summarise(avg_shows = round(sum(No._of_TV_Shows) / 2), avg_movies = round(sum(No._of_Movies) / 2)) %>% 
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_CA = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Central America") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 4 ), avg_movies = round(sum(No._of_Movies) / 4)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_EAs= netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Eastern Asia") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 4 ), avg_movies = round(sum(No._of_Movies) / 4)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_EEu = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Eastern Europe") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 9 ), avg_movies = round(sum(No._of_Movies) / 9)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_NA = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Northern America") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 2 ), avg_movies = round(sum(No._of_Movies) / 2)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_NEu = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Northern Europe") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 10 ), avg_movies = round(sum(No._of_Movies) / 10)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_SEAs = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "South-Eastern Asia") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 5 ), avg_movies = round(sum(No._of_Movies) / 5)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_SA = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "South America") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 10 ), avg_movies = round(sum(No._of_Movies) / 10)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_SAf = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Southern Africa") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 1 ), avg_movies = round(sum(No._of_Movies) / 1)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_SAs = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Southern Asia") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 1 ), avg_movies = round(sum(No._of_Movies) / 1)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_SEu = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Southern Europe") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 7 ), avg_movies = round(sum(No._of_Movies) / 7)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_WAs = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Western Asia") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 2 ), avg_movies = round(sum(No._of_Movies) / 2)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+netflix_WEu = netflix_df %>%
+                group_by(Continent) %>%
+                filter(Continent == "Western Europe") %>%
+               summarise(avg_shows = round(sum(No._of_TV_Shows) / 8 ), avg_movies = round(sum(No._of_Movies) / 8)) %>%
+                dplyr::select(Continent, avg_shows, avg_movies)
+
+df_list = list(netflix_AUS, netflix_CA, netflix_EAs, netflix_EEu, netflix_NA, netflix_NEu, netflix_SEAs, netflix_SA, netflix_SAf,netflix_SAs, netflix_SEu, netflix_WAs, netflix_WEu)
+
+netflix_bar = Reduce(function(x, y) merge(x, y, all=TRUE), df_list)
+
+dfm = pivot_longer(netflix_bar, -Continent, names_to="Key", values_to="Average_Number_of_Content")
+
+bar_plot = ggplot(dfm,aes(x = Continent, y = Average_Number_of_Content)) + 
+    geom_col(aes(fill = Key), stat = "identity", position = "dodge", width = 0.85) + ggtitle("Average Number of Movies and Shows on Netflix per Region (Dec. 2021)") + ylab("Average # of Netflix Content") + xlab("Region") + 
+  scale_fill_discrete(name = "Content Key", labels = c("Average Movies", "Average TV Shows")) + 
+    geom_text(aes(fill = Key, label = Average_Number_of_Content), position = position_dodge(width = 0.9), size = 2.5, vjust = -0.5, hjust = 0.50) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ylim(0, 4500)
+bar_plot
+```
+
+
+## Statistics and Analysis for Bar Plot: 
+- <span style="color: black"><font size="5"> Highest Average # of Movies: 2,125 (Southern Asia) </font></span>
+- <span style="color: black"><font size="5"> Highest Average # of TV Shows: 4,068 (Eastern Europe, Northern America) </font></span>
+- <span style="color: black"><font size="5"> Lowest Average # of Movies: 1,350 (Southern Europe) </font></span>
+- <span style="color: black"><font size="5"> Lowest Average # of TV Shows: 3,076 (Southern Europe) </font></span>
+- <span style="color: black"><font size="5"> Highest Average Library Size (Movies + TV Shows): 6,098 (Australia and New Zealand) </font></span>
+- <span style="color: black"><font size="5"> Lowest Average Library Size: 4,426 (Southern Europe) </font></span>
+```{r, message = FALSE, warning = FALSE, error = FALSE, tidy = TRUE}
+netflix_bar = netflix_bar %>%
+                            mutate(avg_content = avg_shows + avg_movies)
+
+#Highest Average Number of Content
+max_avg_content = netflix_bar %>%
+  filter(avg_content == max(avg_content)) %>%
+  select(Continent, avg_content)
+
+#Lowest  Average Number of Content
+min_avg_content =  netflix_bar %>%
+  filter(avg_content == min(avg_content)) %>%
+    select(Continent, avg_content)
+```
+
+## Scatter Plot
+```{r, warning = FALSE, error = FALSE, tidy = TRUE, message = FALSE}
+
+netflix_df2 = netflix_df
+dot_plot = ggplot(netflix_df, aes(x= Cost_Per_Month_Standard, y = Total_Library_Size, col = Continent)) + 
+  geom_jitter() + scale_x_continuous(breaks = seq(3,22, by = 1)) +  ggtitle("Cost per Month of Standard Netflix Plan vs Total Library Size (Dec. 2021)") + xlab("Cost per Month (USD)") + ylab("Total Library Size (Movies+Shows)") + scale_color_discrete(name = "Region") +
+   geom_smooth(data = netflix_df2, color = "red", method = "lm")
+dot_plot 
+
+```
+
+## Pearson Correlation Test: 
+- <span style="color: black"><font size="5">t = -0.4388, df = 63, p-value = 0.6623</font></span>
+- <span style="color: black"><font size="5">alternative hypothesis: true correlation is not equal to 0</font></span>
+- <span style="color: black"><font size="5">95 percent confidence interval:
+ -0.2951257  0.1912744</font></span>
+- <span style="color: black"><font size="5">sample estimates:
+        cor 
+-0.05519988
+</font></span>
+- <span style="color: black"><font size="5">The correlation coefficient between both variables is -0.05519988, which is close to 0. A coefficient of 0 means there is no linear correlation, but since our value is not 0 then it indicates there is possibly a very weak correlation between cost per month (standard) vs library content. </font></span>
+- <span style="color: #E50914"><font size="5">The corresponding p-value is 0.6623. \n Since this value is greater than .05, we have sufficient evidence to say that the correlation between the two variables is NOT statistically significant</font></span>
+
+```{r, include = FALSE} 
+result = cor.test(netflix_df$Cost_Per_Month_Standard, netflix_df$Total_Library_Size, method = "pearson")
+print(result)
+```
+
+## Visual Analysis for Scatter Plot: 
+- <span style="color: black"><font size="5">Scatter plot displays distribution of the monthly cost for the standard Netflix plan over the total content size based on region </font></span>
+- <span style="color: black"><font size="5">**Mode** for monthly cost of standard subscription: $11.29 and $14.67 (8 country occurrences for each price)</font></span>
+- <span style="color: black"><font size="5">**Mean** for  monthly cost of standard subscription: $11.29</font></span>
+- <span style="color: black"><font size="5">**Median** for  monthly cost of standard subscription: $11.49</font></span>
+- <span style="color: black"><font size="5">Outlier 1: Turkey (Western Asia), Monthly Cost: $3.00, Total Library Size: 4639</font></span>
+- <span style="color: black"><font size="5">Outlier 2: Liechtenstein & Switzerland (Western Europe), Monthly Cost: $20.46, Total Library Size : 3048 and 5506 respectively</font></span>
+```{r, include = FALSE}
+# Function to calculate mode: 
+getmode <- function(x) {
+  a <- table(x)
+  as.numeric(names(a)[a == max(a)])
+}
+# Mean of standard cost: 
+mean_cpm = mean(netflix_df$Cost_Per_Month_Standard)
+mean_cpm 
+
+# Median of standard cost: 
+median_cpm = median(netflix_df$Cost_Per_Month_Standard)
+median_cpm
+
+# Mode of standard cost: 
+mode_cpm = getmode(netflix_df$Cost_Per_Month_Standard)
+mode_cpm
+
+# Occurrences of each price: 
+table(netflix_df$Cost_Per_Month_Standard)
+```
+
+## Statistics and Analysis for Scatter Plot (continued):
+```{r, message = FALSE, warning = FALSE, error = FALSE, tidy = TRUE}
+check_westEU = netflix_df %>%
+  group_by(Continent) %>%
+  filter(Continent == "Western Europe") %>%
+  summarise(Avg_Cost = round(mean(Cost_Per_Month_Standard), 2), Avg_Library_Size = round(mean(Total_Library_Size))) %>%
+  select(Continent, Avg_Cost, Avg_Library_Size)
+
+check_eastEU = netflix_df %>%
+  group_by(Continent) %>%
+  filter(Continent == "Eastern Europe") %>%
+  summarise(Avg_Cost = round(mean(Cost_Per_Month_Standard), 2), Avg_Library_Size = round(mean(Total_Library_Size))) %>%
+  select(Continent, Avg_Cost, Avg_Library_Size)
+options(pillar.sigfig = 5)
+as.data.frame(check_westEU)
+as.data.frame(check_eastEU)
+```
+```{r, warning = FALSE, error = FALSE, tidy = TRUE, message = FALSE}
+cor(netflix_df$Cost_Per_Month_Standard, netflix_df$Total_Library_Size)
+cor(netflix_df$Cost_Per_Month_Basic, netflix_df$Total_Library_Size)
+cor(netflix_df$Cost_Per_Month_Premium, netflix_df$Total_Library_Size)
+```
+* <span style="color: #E50914"><font size="4.5">No correlation between paying more per month for Netflix's standard plan and receiving more library content and this was concluded by using corr function.</font></span>
+
+## Pie Plots
+```{r, warning = FALSE, error = FALSE, tidy = TRUE}
+df = head(netflix_df %>%
+  select(Country,Total_Library_Size,No._of_TV_Shows,No._of_Movies,Cost_Per_Month_Standard) %>%
+   arrange(desc(Cost_Per_Month_Standard)))
+
+categories = c("No. of Movies Liechtenstein($20.46)","No. of TV Shows Liechtenstein($20.46)")
+count = c(1336,1712)
+data = data.frame(categories,count)
+
+categories1 = c("No. of Movies Switzerland($20.46)","No. of TV Shows Switzerland($20.46)")
+count1 = c(1852,3654)
+data1 = data.frame(categories1,count1)
+
+df = head(netflix_df %>%
+  select(Country,Total_Library_Size,No._of_TV_Shows,No._of_Movies,Cost_Per_Month_Standard) %>%
+   arrange(Cost_Per_Month_Standard))
+
+categories2 = c("No. of Movies Turkey($3)","No. of TV Shows Turkey($3)")
+count2 = c(1709,2930)
+data2 = data.frame(categories2,count2)
+
+categories3 = c("Avg No. of Movies/Country","Avg No. of TV Shows/Country")
+count3 = c(round(mean(df$No._of_Movies)), round(mean(df$No._of_TV_Shows)))
+data3 = data.frame(categories3,count3)
+
+pies = plot_ly()
+
+pies = pies %>% add_pie(data, labels = ~categories, values = ~count, name="$20.46",domain = list(row = 0, column = 0))
+pies = pies %>% add_pie(data1, labels = ~categories1, values = ~count1, name="$20.46",domain = list(row = 0, column = 1))
+pies = pies %>% add_pie(data2, labels = ~categories2, values = ~count2, name="Turkey$3",domain = list(row = 1, column = 0))
+pies = pies %>% add_pie(data3, labels = ~categories3, values = ~count3, name="Average/country",domain = list(row = 1, column = 1))
+
+pies = pies %>% layout(title = "Highest Standard Plan ($20.46) vs Lowest ($3.00) by Library Category", showlegend = T,
+       grid=list(rows = 2, columns=2),
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+pies
+```
+
+## Statistics and Analysis for Pie Plots: 
+* <span style="color: black"><font size="5">Highest standard Netflix subscription plans: Switzerland and Liechtenstein ($20.46 per month)</font></span>
+* <span style="color: black"><font size="5">Percent difference of TV shows & movies (Switzerland & Liechtenstein): 10.2%</font></span>
+* <span style="color: black"><font size="5">Lowest standard Netflix subscription plan: Turkey ($3.00 per month)</font></span>
+* <span style="color: black"><font size="5">By comparing Turkey's proportion of content to Switzerland and Liechtenstein, Turkey's percentage of TV shows and movies lies in between the percentages of Switzerland and Liechtenstein</font></span>
+* <span style="color: black"><font size="5">Not a significant difference in content proportions between the lowest standard price subscriptions and highest</font></span>
+* <span style="color: black"><font size="5">Netflix has more TV shows then movies in their library</font></span>
+
+## 3D Scatter Plot
+```{r, warning = FALSE, error = FALSE, tidy = TRUE}
+scatter_3d = plot_ly(data = netflix_df, x = ~Cost_Per_Month_Basic, y = ~Cost_Per_Month_Premium, z = ~Total_Library_Size)
+
+scatter_3d = scatter_3d %>% add_markers(color = as.factor(netflix_df$Continent), colors = c("firebrick", "coral", "lightskyblue", "plum", "darkolivegreen", "palegreen", "palevioletred", "lightgrey", "tomato", "sandybrown", "slateblue", "mediumpurple", "magenta"), alpha = 1.0, size = 50)
+
+scatter_3d = scatter_3d %>% layout(scene = list(xaxis = list(title = 'Basic Monthly Cost ($)'),
+                     yaxis = list(title = 'Premium Monthly Cost ($)'),
+                     zaxis = list(title = 'Total Library Size')),
+                     title = "Netflix Plan Prices: Basic vs Premium vs Library Size (Dec. 2021)",
+                     legend = list(title = list(text='<b> Region </b>'))
+                     )
+scatter_3d
+```
+
+## Statistics and Analysis for 3D Scatter Plot: 
+- <span style ="color: black"><font size="5"> **Outliers were grouped in the following categories:**</font></span>
+- <span style="color: black"><font size="5"> Good Deal: India (Basic = $2.64, Premium = $8.60, Library Size = 5,843)</font></span>
+- <span style="color: black"><font size="5"> Turkey (Basic = $1.97, Premium = $4.02, Library Size = 4,639)</font></span>
+- <span style="color: black"><font size="5"> Bad Deal: Liechtenstein (Basic = $12.88, Premium = $26.96, Library Size = 3,048)</font></span>
+- <span style="color: black"><font size="5"> San Marino (Basic = $9.03, Premium = $20.32, Library Size = 2,310)</font></span>
+- <span style ="color: black"><font size="5"> Because of the occurring outliers, we can conclude that there is no relationship between Netflix's basic and premium monthly plan vs total library size.</font></span>
+
+## Conclusion: 
+<span style="color: #E50914"><font size="5.1">Based on the correlation coefficient test conducted and by looking at the mean, median, mode and several outliers found in this data, we can conclude that there is no correlation between Netflix's basic, standard and premium monthly cost vs the total library content (TV shows + movies) per region.<br /> </font></span>
+<span style="color: black"><font size="5.1"><br />There could possibly be other factors that contribute to Netflix's pricing vs total content per region. Factors such as economic status of each region/country, taxes, studio company negotiations, etc. would have to be taken into consideration to see how content available by region and pricing is affected. </font></span>
+
+
